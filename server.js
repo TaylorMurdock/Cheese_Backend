@@ -1,107 +1,97 @@
-///////////////////
-// DEPENDENCIES
-///////////////////
-
-// get .env
+////////////////////////////
+// IMPORT OUR DEPENDENCIES
+////////////////////////////
 require("dotenv").config();
-
-//pull MONGODB_URL and port from .env and give it port 3000
-const { PORT = 3000, MONGODB_URL } = process.env;
-
-//import express
 const express = require("express");
-
-//app object
 const app = express();
-
-// mongoose import
 const mongoose = require("mongoose");
-
-// middleware imports
 const cors = require("cors");
 const morgan = require("morgan");
 
-///////////////////
+///////////////////////////
 // DATABASE CONNECTION
-///////////////////
+///////////////////////////
+const { PORT = 8000, MONGODB_URL } = process.env;
 
-// making connection to the db
 mongoose.connect(MONGODB_URL, {
-  useUnifiedTopology: true,
   useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
-//connection events
+
 mongoose.connection
-  .on("open", () => console.log("mongoose is connected"))
-  .on("close", () => console.log("mongoose is disconnected"))
+  .on("open", () => console.log("You are connected to mongoose"))
+  .on("close", () => console.log("You are disconnected from mongoose"))
   .on("error", (error) => console.log(error));
 
-///////////////////
-// MODELS
-///////////////////
-const CheeseSchema = new mongoose.Schema({
+////////////////////////////
+// Models
+////////////////////////////
+const cheeseSchema = new mongoose.Schema({
   name: String,
-  countryOfOrigin: String,
   image: String,
+  countryOfOrigin: String,
 });
 
-const Cheese = mongoose.model("Cheese", CheeseSchema);
+const Cheeses = mongoose.model("Cheeses", cheeseSchema);
 
-///////////////////
-// MIDDLEWARE
-///////////////////
-app.use(cors()); // to prevent cors errors, open access to all origins
-app.use(morgan("dev")); // logging
-app.use(express.json()); // parse json bodies
+//////////////////////////////
+// Middleware
+//////////////////////////////
+app.use(cors());
+app.use(morgan("dev"));
+app.use(express.json());
 
-///////////////////
+////////////////////////////
 // ROUTES
-///////////////////
-
-// test route
-app.get("/", (req, res) => {
-  res.send("hello world");
-});
-
-// CHEESE INDEX ROUTE
-app.get("/cheese", async (req, res) => {
+////////////////////////////
+app.get("/", async (req, res) => {
   try {
-    res.json(await Cheese.find({}));
+    const cheeses = await Cheeses.find({});
+    res.json(cheeses);
   } catch (error) {
-    res.send(400).json(error);
+    res.status(400).json({ error });
   }
 });
 
-// CHEESE CREATE ROUTE
-app.post("/cheese", async (req, res) => {
+app.post("/", async (req, res) => {
   try {
-    res.json(await CheeseSchema.create(req.body));
+    const cheese = await Cheeses.create(req.body);
+    res.json(cheese);
   } catch (error) {
-    res.send(400).json(error);
+    res.status(400).json({ error });
   }
 });
 
-// EDIT CHEESE ROUTE
-app.put("/cheese/:id", async (req, res) => {
+app.get("/:id", async (req, res) => {
   try {
-    res.json(
-      await Cheese.findByIdAndUpdate(req.params.id, req.body, { new: true })
-    );
+    const cheese = await Cheeses.findById(req.params.id);
+    res.json(cheese);
   } catch (error) {
-    res.status(400).json(error);
+    res.status(400).json({ error });
   }
 });
 
-// DELETE CHEESE ROUTE
-app.delete("/cheese/:id", async (req, res) => {
+app.put("/:id", async (req, res) => {
   try {
-    res.json(await Cheese.findByIdAndRemove(req.params.id));
+    const cheese = await Cheeses.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.json(cheese);
   } catch (error) {
-    res.status(400).json(error);
+    res.status(400).json({ error });
   }
 });
 
-///////////////////
+app.delete("/:id", async (req, res) => {
+  try {
+    const cheese = await Cheeses.findByIdAndDelete(req.params.id);
+    res.status(204).json(cheese);
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+});
+
+////////////////////////////
 // LISTENER
-///////////////////
-app.listen(PORT, () => console.log(`listening on PORT ${PORT}`));
+////////////////////////////
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
