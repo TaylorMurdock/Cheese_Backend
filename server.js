@@ -1,7 +1,6 @@
-///////////////////////
-//IMPORT DEPENDENCIES//
-///////////////////////
+// This file sets up the server, database connection, and routes.
 
+// Import necessary dependencies.
 require("dotenv").config();
 const { PORT, DATABASE_URL } = process.env;
 const express = require("express");
@@ -10,37 +9,29 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 const cors = require("cors");
 
-///////////////////////
-//DATABASE CONNECTION//
-///////////////////////
-
+// Establish a connection to the MongoDB database.
 mongoose.connect(DATABASE_URL);
 mongoose.connection
   .on("open", () => console.log("you are connected to mongoose"))
   .on("close", () => console.log("you are NOT connected to mongoose"))
   .on("error", (error) => console.log(error));
 
-///////////////////////
-////MIDDLEWARE/////
-///////////////////////
+// Use middleware for logging, JSON parsing, and enabling CORS.
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cors());
 
-///////////////////////
-///////MODELS////////
-///////////////////////
+// Define the schema for the 'Cheese' model.
 const cheeseSchema = new mongoose.Schema({
   name: String,
   countryOfOrigin: String,
   image: String,
 });
 
+// Create the 'Cheese' model based on the schema.
 const Cheese = mongoose.model("Cheese", cheeseSchema);
 
-///////////////////////
-///////ROUTES//////////
-///////////////////////
+// Define routes for CRUD operations related to cheese items.
 app.get("/cheese", async (req, res) => {
   const cheese = await Cheese.find({});
   res.json(cheese);
@@ -69,9 +60,7 @@ app.delete("/cheese/:id", async (req, res) => {
   res.json(cheese);
 });
 
-///////////////////////
-///////LISTENER////////
-///////////////////////
+// Start the server and listen on the specified port.
 app.listen(PORT, () => {
   console.log(`listening on PORT ${PORT}`);
 });
