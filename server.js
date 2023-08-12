@@ -1,97 +1,77 @@
-////////////////////////////
-// IMPORT OUR DEPENDENCIES
-////////////////////////////
+///////////////////////
+//IMPORT DEPENDENCIES//
+///////////////////////
+
 require("dotenv").config();
+const { PORT, DATABASE_URL } = process.env;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const cors = require("cors");
 const morgan = require("morgan");
+const cors = require("cors");
 
-///////////////////////////
-// DATABASE CONNECTION
-///////////////////////////
-const { PORT = 8000, MONGODB_URL } = process.env;
+///////////////////////
+//DATABASE CONNECTION//
+///////////////////////
 
-mongoose.connect(MONGODB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
+mongoose.connect(DATABASE_URL);
 mongoose.connection
-  .on("open", () => console.log("You are connected to mongoose"))
-  .on("close", () => console.log("You are disconnected from mongoose"))
+  .on("open", () => console.log("you are connected to mongoose"))
+  .on("close", () => console.log("you are NOT connected to mongoose"))
   .on("error", (error) => console.log(error));
 
-////////////////////////////
-// Models
-////////////////////////////
-const cheeseSchema = new mongoose.Schema({
-  name: String,
-  image: String,
-  countryOfOrigin: String,
-});
-
-const Cheeses = mongoose.model("Cheeses", cheeseSchema);
-
-//////////////////////////////
-// Middleware
-//////////////////////////////
-app.use(cors());
+///////////////////////
+////MIDDLEWARE/////
+///////////////////////
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(cors());
 
-////////////////////////////
-// ROUTES
-////////////////////////////
-app.get("/cheeses", async (req, res) => {
-  try {
-    const cheeses = await Cheeses.find({});
-    res.json(cheeses);
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+///////////////////////
+///////MODELS////////
+///////////////////////
+const cheeseSchema = new mongoose.Schema({
+  name: String,
+  countryOfOrigin: String,
+  image: String,
 });
 
-app.post("/cheeses", async (req, res) => {
-  try {
-    const cheese = await Cheeses.create(req.body);
-    res.json(cheese);
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+const Cheese = mongoose.model("Cheese", cheeseSchema);
+
+///////////////////////
+///////ROUTES//////////
+///////////////////////
+app.get("/cheese", async (req, res) => {
+  const cheese = await Cheese.find({});
+  res.json(cheese);
 });
 
-app.get("/cheeses/:id", async (req, res) => {
-  try {
-    const cheese = await Cheeses.findById(req.params.id);
-    res.json(cheese);
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+app.post("/cheese", async (req, res) => {
+  const cheese = await Cheese.create(req.body);
+  res.json(cheese);
 });
 
-app.put("/cheeses/:id", async (req, res) => {
-  try {
-    const cheese = await Cheeses.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.json(cheese);
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+app.get("/cheese/:id", async (req, res) => {
+  const id = req.params.id;
+  const cheese = await Cheese.findById(id);
+  res.json(cheese);
 });
 
-app.delete("/cheeses/:id", async (req, res) => {
-  try {
-    const cheese = await Cheeses.findByIdAndDelete(req.params.id);
-    res.status(204).json(cheese);
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+app.put("/cheese/:id", async (req, res) => {
+  const id = req.params.id;
+  const cheese = await Cheese.findByIdAndUpdate(id, req.body, { new: true });
+  res.json(cheese);
 });
 
-////////////////////////////
-// LISTENER
-////////////////////////////
-app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+app.delete("/cheese/:id", async (req, res) => {
+  const id = req.params.id;
+  const cheese = await Cheese.findByIdAndDelete(id);
+  res.json(cheese);
+});
+
+///////////////////////
+///////LISTENER////////
+///////////////////////
+app.listen(PORT, () => {
+  console.log(`listening on PORT ${PORT}`);
+});
