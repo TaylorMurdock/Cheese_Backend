@@ -44,7 +44,7 @@ app.use(express.json());
 ////////////////////////////
 // ROUTES
 ////////////////////////////
-app.get("/", async (req, res) => {
+app.get("/cheeses", async (req, res) => {
   try {
     const cheeses = await Cheeses.find({});
     res.json(cheeses);
@@ -53,7 +53,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.post("/", async (req, res) => {
+app.post("/cheeses", async (req, res) => {
   try {
     const cheese = await Cheeses.create(req.body);
     res.json(cheese);
@@ -62,7 +62,7 @@ app.post("/", async (req, res) => {
   }
 });
 
-app.get("/:id", async (req, res) => {
+app.get("/cheeses/:id", async (req, res) => {
   try {
     const cheese = await Cheeses.findById(req.params.id);
     res.json(cheese);
@@ -71,7 +71,7 @@ app.get("/:id", async (req, res) => {
   }
 });
 
-app.put("/:id", async (req, res) => {
+app.put("/cheeses/:id", async (req, res) => {
   try {
     const cheese = await Cheeses.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -82,7 +82,7 @@ app.put("/:id", async (req, res) => {
   }
 });
 
-app.delete("/:id", async (req, res) => {
+app.delete("/cheeses/:id", async (req, res) => {
   try {
     const cheese = await Cheeses.findByIdAndDelete(req.params.id);
     res.status(204).json(cheese);
