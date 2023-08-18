@@ -31,6 +31,10 @@ const cheeseSchema = new mongoose.Schema({
 // Create the 'Cheese' model based on the schema.
 const Cheese = mongoose.model("Cheese", cheeseSchema);
 
+app.get("/", (req, res) => {
+  res.redirect("/cheese");
+});
+
 // Define routes for CRUD operations related to cheese items.
 app.get("/cheese", async (req, res) => {
   const cheese = await Cheese.find({});
